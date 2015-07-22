@@ -1,0 +1,120 @@
+/* -*- Mode: CSS; tab-width: 4; indent-tabs-mode: nil; -*- */
+/* vim:set ft=css ts=4 sw=4 sts=4 autoindent: */
+
+
+/* Bratenstein stylesheet. */
+
+/* Frankenbrat styles */
+/*body, html {
+  margin: 0;
+  overflow: hidden;
+  height:100%;
+}
+
+.connection-failed {
+  text-align: center;
+}
+
+.connection-failed #code {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.left-pane {
+  position: absolute;
+  top: 0px;
+  bottom: 0;
+  left: 0;
+  width: 65%;
+  overflow-y: scroll; 
+}
+
+.right-pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow-y: scroll;
+  width: 35%;
+}
+
+
+.character-annotation-panel .panel-heading {
+  background: none;
+  background-color: #EEE;
+  padding: 1px;
+  text-align: center;
+}
+
+.character-annotation-panel .panel-body {
+  padding: 0;
+}
+
+.tag-counter {
+  color: blue;
+  font-size: 15px;
+  margin: 10px auto;
+}
+
+.entity-selection {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.entity-selection p {
+  font-size: 20px;
+}
+
+.entity-selection .selection {
+  background: yellow;
+  font-weight: bold;
+}
+
+.entity-selection .no-selection {
+  font-weight: bold;
+}
+
+.alias-counter-btn {
+  color: #000000;
+  font-weight: bold;  
+}
+
+.unresolved-counter-btn {
+  color: #000000;
+  font-weight: bold; 
+}
+
+.tag-item {
+  padding: 2px;
+  overflow: hidden;
+}
+
+#core-tag {
+  background: #EEE;
+}
+
+.btn-tag {
+  font-weight: bold;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+.change-tag-btn {
+  margin-top: 5px;
+  margin-bottom: 4px;
+}
+
+.non-tag-btn {
+  background: none;
+  border-radius: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.new-character-btn {
+
+}
+
+.untag-btn {
+
+}
+*/
