@@ -11,11 +11,6 @@
   <script src="/lib/angular-resource.min.js"></script>
   <script src="/lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
 
-  <!-- Firebase -->
-  <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
-  <!-- AngularFire -->
-  <script src="https://cdn.firebase.com/libs/angularfire/1.1.1/angularfire.min.js"></script>
-
   <link rel="stylesheet" href="/lib/bootstrap.min.css">
   <link rel="stylesheet" href="/lib/bootstrap-theme.min.css">
   <link rel="stylesheet" type="text/css" href="css/brat-style.css" />
@@ -23,24 +18,26 @@
   <link rel="stylesheet" type="text/css" href="css/style-vis.css" />
   <link rel="stylesheet" type="text/css" href="css/jquery-theme/jquery-ui-redmond.css" />
   
+  <!-- Firebase -->
+  <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+  <!-- AngularFire -->
+  <script src="https://cdn.firebase.com/libs/angularfire/1.1.1/angularfire.min.js"></script>
+  
+  <!-- TODO: Move head.load.min.js to lib? -->
   <script type="text/javascript" src="head.load.min.js"></script>
   <script type="text/javascript" src="lib/json2.js"></script>
   <script type="text/javascript" src="lib/spin.min.js"></script>
   <script type="text/javascript" src="lib/contextMenu.js"></script>
+  <script type="text/javascript" src="js/domain.js"></script>
   <script type="text/javascript" src="js/app.js"></script>
-  <!--<script type="text/javascript" src="js/fb.js"></script>-->
-  <!--<script type="text/javascript" src="js/domain.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/mainController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/spinnerController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/contextMenuController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/docSelectorController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/showController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/deleteTagController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/bratController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/tagController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/navigationController.js"></script>-->
-  <!--<script type="text/javascript" src="js/controllers/logController.js"></script>-->
+  <script type="text/javascript" src="js/fb.js"></script>
+  <script type="text/javascript" src="js/controllers/main.js"></script>
+  <script type="text/javascript" src="js/controllers/brat-vis.js"></script>
+  <script type="text/javascript" src="js/controllers/interaction-tagging.js"></script>
 
+  <!--Directives-->
+  <script type="text/javascript" src="js/directives/watch-highlight.js"></script>
+  <script type="text/javascript" src="js/directives/interaction-tagging-area.js"></script>
 </head>
 
 <body>
@@ -50,9 +47,172 @@
     @import url("//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css");
   </style>
   
-  <div>
-    <h1 style="text-align:center">Welcome to Bratenstein!</h1>
-  </div>
+  <div ng-controller="mainController as mainCtrl">
+    
+    <!--TODO: Separate out into directive.-->
+    <div class="alert alert-danger connection-failed" role="alert" style="height: 100vh;" ng-if="!mainCtrl.connectedToFirebase()">
+      <h1>Connection to Firebase Failed</h1>
+      <p>
+        Check that the <span id="code">FB</span> instance exists and its
+        <span id="code">link</span> property is properly set.
+      </p>
+    </div><!-- alert -->
+    
+    <!--<div id="main" class="container" ng-if="mainCtrl.connectedToFirebase()" ng-controller="bratController" ng-click="selectEntity($event)" tabindex="0" ng-keypress="nextSelection($event)">-->
+    <div class="container" ng-controller="interactionTaggingController as intTaggingCtrl" ng-if="mainCtrl.connectedToFirebase()">
+      <div class="row">
+        <div id="content" class="col-sm-7 left-pane">
+          <!--TODO: Style in CSS stylesheet.-->
+          <h1 style="text-align:center">Welcome to Bratenstein!</h1>
+          
+          <!--TODO: Move to styles.-->
+          <style type="text/css">
+            text {
+              font-size: 15px;
+            }
+            .span text {
+              font-size: 10px;
+            }
+            .arcs text {
+              font-size: 9px;
+            }
+          </style>
+      
+          <!--TODO: Move to source.-->
+          <script type="text/javascript">
+            var bratLocation = 'lib/brat/';
+      
+            head.js(
+              // External libraries.
+              bratLocation + '/client/lib/jquery.min.js',
+              bratLocation + '/client/lib/jquery.svg.min.js',
+              bratLocation + '/client/lib/jquery.svgdom.min.js',
+      
+              // brat helper modules.
+              bratLocation + '/client/src/configuration.js',
+              bratLocation + '/client/src/util.js',
+              bratLocation + '/client/src/annotation_log.js',
+              bratLocation + '/client/lib/webfont.js',
+              
+              // brat modules.
+              bratLocation + '/client/src/dispatcher.js',
+              bratLocation + '/client/src/url_monitor.js',
+              bratLocation + '/client/src/visualizer.js'
+            );
+      
+            var webFontURLs = [
+              bratLocation + '/static/fonts/Astloch-Bold.ttf',
+              bratLocation + '/static/fonts/PT_Sans-Caption-Web-Regular.ttf',
+              bratLocation + '/static/fonts/Liberation_Sans-Regular.ttf'
+            ];
+          </script>
+          
+          <div id="brat-view" ng-controller="bratVisController" ng-click="selectTagged($event)" watch-highlight></div>
+        </div><!-- left-pane -->
+        
+        <div id="content" class="col-sm-5 right-pane">
+          <div class="panel panel-default interaction-tagging-panel">
+            
+            <div class="panel-heading">
+              <h2>Interaction Tagging Panel</h2>
+            </div><!-- panel-heading -->
+              
+            <!-- TODO: Create dedicated directive/template. -->
+            <div ng-if="!isHighlighted() && !resolvingDialogue()" class="void-tagging-area">
+              <div class="nothing-selected">
+                (Nothing Selected...)
+              </div>
+              
+               <!-- TODO: Temporary measure. -->
+              </br>
+              </br>
+              
+              <div class="resolve-dialogue-btn-area" align="center">
+                <button class="btn btn-default resolve-dialogue-btn" ng-click="toFirstStep()">Resolve Dialogue</button>
+              </div>
+              
+              <div ng-if="dialogueInteractions.length > 0" align="center">
+                <h4>Dialogue Interactions:</h4>
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="diagInt in dialogueInteractions">
+                    <p>DS{{ diagInt.index }}</p>
+                    Speakers:
+                    <p ng-repeat="s in diagInt.speakers" ng-style="{background: s.bgColor}">{{ s.type }}</p>
+                    Listeners:
+                    <p ng-repeat="l in diagInt.listeners" ng-style="{background: l.bgColor}">{{ l.type }}</p>
+                  </li>
+                </ul>
+              </div>
+            </div>  
+            
+            <interaction-tagging-area ng-if="isHighlighted()" selected="highlightedSelection" on-interaction-type=""></interaction-tagging-area>
+            
+            <!-- TODO: Move under interactionTaggingArea directive/template or create dedicated directive/template. -->
+            <div ng-if="isHighlighted()">
+              <div ng-if="isFirstPhase()" class="interaction-type-menu" align="center">
+                <h4>Select interaction type: </h4>
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="tag in collData.event_types">
+                    <button class="btn btn-default interaction-type-btn" ng-style="{background: tag.bgColor}" ng-click="setInteractionType(tag.type)">{{ tag.type }}</button>
+                  </li>
+                </ul>
+              </div>
+              
+              <div ng-if="isSecondPhase()" align="center">
+                <h4>Select characters...</h4>
+                <button class="btn btn-success done-character-selection-btn" ng-click="setCharacters()">Done</button>
+                <button class="btn btn-danger cancel-character-selection-btn" ng-click="resetPhase()">Cancel</button>
+              </div>
+            </div>
+
+            <div ng-if="isFirstStep()" align="center">
+              <h4>Select DS...</h4>
+              <button class="btn btn-success confirm-ds-selection-btn" ng-click="selectDS()">Ok</button>
+              <button class="btn btn-danger cancel-ds-selection-btn" ng-click="resetResolution()">Cancel</button>
+            </div>
+            
+            <div ng-if="isSecondStep()" align="center">
+              <h4>Select Speaker(s)...</h4>
+              
+              <button class="btn btn-success" ng-click="createDialogueInteraction()">Done</button>
+              <button class="btn btn-danger" ng-click="resetResolution()">Cancel</button>
+              
+              <div>
+                Speakers:
+                <span ng-repeat="s in speakers">
+                  <span ng-style="{background: s.bgColor}">{{ s.type }}</span>
+                </span>
+              </div>
+              
+              <div>
+                Listeners:
+                <span ng-repeat="l in listeners">
+                  <span ng-style="{background: l.bgColor}">{{ l.type }}</span>
+                </span>
+              </div>
+
+              <form ng-submit="intTaggingCtrl.addSpeaker(speakerInput)">
+                <input type="text" name="speaker" ng-model="speakerInput" ng-change="changeForSpeakerInput(speakerInput)"/>
+                <input type="submit" value="Add Speaker"/>
+              </form>
+              
+              <form ng-submit="intTaggingCtrl.addListener(listenerInput)">
+                <input type="text" name="listener" ng-model="listenerInput" ng-change="changeForListenerInput(listenerInput)"/>
+                <input type="submit" value="Add Listener"/>
+              </form>
+              
+              <ul class="list-group">
+                <li class="list-group-item" ng-repeat="tag in matchingCharacters">
+                  <span ng-style="{background: tag.bgColor}">{{ tag.type }}</span>
+                </li>
+              </ul>
+            </div>
+
+          </div><!-- interaction-tagging-panel -->
+        </div><!-- right-pane -->
+      </div><!-- row -->
+    </div><!-- container -->
+  </div><!-- (TODO: Main) -->
   
 </body>
 

@@ -4,8 +4,7 @@
 
 /* Bratenstein stylesheet. */
 
-/* Frankenbrat styles */
-/*body, html {
+body, html {
   margin: 0;
   overflow: hidden;
   height:100%;
@@ -19,6 +18,89 @@
   font-family: "Courier New", Courier, monospace;
 }
 
+.left-pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: scroll; 
+  width: 65%;
+}
+
+.right-pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow-y: scroll;
+  width: 35%;
+}
+
+.interaction-tagging-panel {
+  margin: 5px;
+}
+
+.interaction-tagging-panel .panel-heading {
+  background: none;
+  background-color: #EEE;
+  padding: 1px;
+  text-align: center;
+}
+
+.interaction-tagging-panel .panel-body {
+  padding: 0;
+}
+
+.void-tagging-area {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.void-tagging-area .nothing-selected {
+  color: gray;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+resolve-dialogue-btn-area {
+
+}
+
+.resolve-dialogue-btn {
+  font-weight: bold;
+}
+
+.highlighted-selection {
+  font-size: 20px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.highlighted-selection .selection {
+  background: yellow;
+  font-weight: bold;
+}
+
+interaction-type-menu {
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+interaction-type-menu interaction-type-btn {
+  font-weight: bold;
+  margin: 10px auto;
+}
+
+select-ds-menu {
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+
+/* Frankenbrat styles */
+/*
 .left-pane {
   position: absolute;
   top: 0px;
