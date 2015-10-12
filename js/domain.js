@@ -6,7 +6,13 @@ var CHAR_OFFSETS_IND = 2;
 var START_OFFSET_IND = 0;
 var END_OFFSET_IND = 1;
 
+/* brat event indices. */
+var TRIGGER_ID_IND = 1;
+
 var getId = function (e) { return e[ID_IND]; };
+
+var isEntity = function(item) { return getId(item)[0] === 'T'; };
+var isEvent = function(item) { return getId(item)[0] === 'E'; };
 
 var getType = function (e) { return e[TYPE_IND]; };
 
@@ -17,6 +23,8 @@ var getStartOffset = function (e) {
 var getEndOffset = function (e) {
     return e[CHAR_OFFSETS_IND][0][END_OFFSET_IND];
 };
+
+var getTriggerId = function (event) { return event[TRIGGER_ID_IND]; };
 
 var getSameOffsetEntities = function (e, entities) {
     return entities.filter(function (f) {

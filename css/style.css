@@ -63,6 +63,10 @@ body, html {
   text-align: center;
 }
 
+.delete-interaction-btn {
+  margin: 10px 0;
+}
+
 resolve-dialogue-btn-area {
 
 }

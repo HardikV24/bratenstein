@@ -30,7 +30,7 @@ app.controller('bratVisController', function($scope, $rootScope,
           });
           
           // TODO: Implement as services so its accessible outside the controller.
-          $rootScope.selectedTaggedEntities = [];
+          $rootScope.selectedTagged = [];
           // liveDispatcher.on('doneRendering', $scope.findVisual);
   
           // $rootScope.taggedEntities = sortTaggedEntities(docData.entities);
@@ -98,12 +98,17 @@ app.controller('bratVisController', function($scope, $rootScope,
     $(el).css({'stroke': prevStroke, 'stroke-width': '1px'});
   };
 
-  $scope.unselectTagged = function() {
-    $rootScope.selectedTaggedEntities.forEach(function (se){
+  $scope.eventSelected = function() {
+    return ($rootScope.selectedTagged.length === 1 &&
+      isEvent($rootScope.selectedTagged[0].entity));
+  };
+
+  $rootScope.unselectTagged = function() {
+    $rootScope.selectedTagged.forEach(function (se){
       $scope.unapplyTaggedSelectionStyle(se.element, se.prevStroke);
     });
     
-    $rootScope.selectedTaggedEntities = [];
+    $rootScope.selectedTagged = [];
   };
   
   // TODO: Clean-up.
@@ -115,44 +120,79 @@ app.controller('bratVisController', function($scope, $rootScope,
         if (attributes[i].nodeName == 'data-span-id') {
           var id = attributes[i].value;
           
-          // find function on arrays doesn't work in Chrome :(.
-          var entity = $rootScope.docData.entities.filter(function (e) {
-            return getId(e) == id;
-          });
-          
-          if (entity.length > 0) {
-            entity = entity[0];
+          // Entity selected.
+          if (id[0] === 'T') {
+            // find function on arrays doesn't work in Chrome :(.
+            var entity = $rootScope.docData.entities.filter(function (e) {
+              return getId(e) == id;
+            });
             
-            var sameOffsetEntities = getSameOffsetEntities(entity,
-              $rootScope.docData.entities);
+            if (entity.length > 0) {
+              entity = entity[0];
+              
+              var sameOffsetEntities = getSameOffsetEntities(entity,
+                $rootScope.docData.entities);
+              
+              var newTaggedEntities = sameOffsetEntities.map(
+                function (e) {
+                  return {
+                    entity: e,
+                    element: null,
+                    prevStroke: null
+                  };
+                }
+              );
+              
+              $('rect').each(function () {
+                var el = this;
+                var dataSpanId = $(this).attr('data-span-id');
+                newTaggedEntities.forEach(function (se) {
+                  if (dataSpanId === getId(se.entity)) {
+                    se.element = el;
+                    se.prevStroke = $(el).attr('stroke');
+                    $scope.applyTaggedSelectionStyle(el);
+                  }
+                });
+              });
+              
+              if ($scope.eventSelected())
+                $rootScope.unselectTagged();
+              
+              $rootScope.selectedTagged =
+                $rootScope.selectedTagged.concat(newTaggedEntities);
+            }
+          // Event trigger selected.
+          } else if (id[0] === 'E') {
+            $rootScope.unselectTagged();
             
-            var newTaggedEntities = sameOffsetEntities.map(
-              function (e) {
-                return {
-                  entity: e,
-                  element: null,
-                  prevStroke: null
-                };
-              }
-            );
-            
-            $('rect').each(function () {
-              var el = this;
-              var dataSpanId = $(this).attr('data-span-id');
-              newTaggedEntities.forEach(function (se) {
-                if (dataSpanId === getId(se.entity)) {
-                  se.element = el;
-                  se.prevStroke = $(el).attr('stroke');
+            var event = $rootScope.docData.events.filter(function (e) {
+              return getId(e) == id;
+            });
+
+            if (event.length > 0) {
+              event = event[0];
+              
+              var element = null, prevStroke = null;
+              $('rect').each(function () {
+                var el = this;
+                var dataSpanId = $(this).attr('data-span-id');
+                if (dataSpanId === getId(event)) {
+                  element = el;
+                  prevStroke = $(el).attr('stroke');
                   $scope.applyTaggedSelectionStyle(el);
                 }
               });
-            });
-            
-            $rootScope.selectedTaggedEntities = $rootScope.selectedTaggedEntities.concat(newTaggedEntities);
-          };
+              
+              $rootScope.selectedTagged = [
+                {entity: event, element: element, prevStroke: prevStroke}
+              ];
+              
+              $rootScope.toDeletionPhase();
+            }
+          }
         }
       }
     } else
-      $scope.unselectTagged();
+      $rootScope.unselectTagged();
   };
 });

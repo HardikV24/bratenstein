@@ -118,7 +118,7 @@
             </div><!-- panel-heading -->
               
             <!-- TODO: Create dedicated directive/template. -->
-            <div ng-if="!isHighlighted() && !resolvingDialogue()" class="void-tagging-area">
+            <div ng-if="!isHighlighted() && !resolvingDialogue() && !isDeletionPhase()" class="void-tagging-area">
               <div class="nothing-selected">
                 (Nothing Selected...)
               </div>
@@ -131,15 +131,16 @@
                 <button class="btn btn-default resolve-dialogue-btn" ng-click="toFirstStep()">Resolve Dialogue</button>
               </div>
               
-              <div ng-if="dialogueInteractions.length > 0" align="center">
+              <div ng-if="dialogues.length > 0" align="center">
                 <h4>Dialogue Interactions:</h4>
                 <ul class="list-group">
-                  <li class="list-group-item" ng-repeat="diagInt in dialogueInteractions">
+                  <li class="list-group-item" ng-repeat="diagInt in dialogues">
                     <p>DS{{ diagInt.index }}</p>
                     Speakers:
                     <p ng-repeat="s in diagInt.speakers" ng-style="{background: s.bgColor}">{{ s.type }}</p>
                     Listeners:
                     <p ng-repeat="l in diagInt.listeners" ng-style="{background: l.bgColor}">{{ l.type }}</p>
+                    <button class="btn btn-danger delete-dialogue-btn" ng-click="deleteDialogue(diagInt)">DELETE</button>
                   </li>
                 </ul>
               </div>
@@ -163,6 +164,10 @@
                 <button class="btn btn-success done-character-selection-btn" ng-click="setCharacters()">Done</button>
                 <button class="btn btn-danger cancel-character-selection-btn" ng-click="resetPhase()">Cancel</button>
               </div>
+            </div>
+
+            <div ng-if="isDeletionPhase()" align="center">
+              <button class="btn btn-danger delete-interaction-btn" ng-click="deleteInteraction()">DELETE INTERACTION</button>
             </div>
 
             <div ng-if="isFirstStep()" align="center">

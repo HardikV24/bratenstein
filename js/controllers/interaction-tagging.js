@@ -17,7 +17,8 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
   $scope.speakers = [];
   $scope.listeners = [];
   
-  $scope.dialogueInteractions = [];
+  // TODO: Redundant.
+  $scope.dialogues = [];
   
   $scope.isFirstPhase = function() {
     return $scope.taggingPhase === "I1";
@@ -25,6 +26,14 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
   
   $scope.isSecondPhase = function() {
     return $scope.taggingPhase === "I2";
+  };
+  
+  $scope.isDeletionPhase = function() {
+    return $scope.taggingPhase === "ID";
+  };
+  
+  $rootScope.toDeletionPhase = function() {
+    $scope.taggingPhase = "ID";
   };
   
   $scope.resetPhase = function() {
@@ -51,8 +60,8 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
   };
   
   $scope.setCharacters = function() {
-    if($rootScope.selectedTaggedEntities.length > 0) {
-      var characterItems = $rootScope.selectedTaggedEntities.map(function (e) {
+    if($rootScope.selectedTagged.length > 0) {
+      var characterItems = $rootScope.selectedTagged.map(function (e) {
         return ["Character", getId(e.entity)];
       });
       
@@ -107,6 +116,21 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
     $scope.resetPhase();
   };
   
+  $scope.deleteInteraction = function() {
+    var event = $rootScope.selectedTagged[0].entity;
+    
+    $rootScope.docData.triggers = $rootScope.docData.triggers.filter(function (t) {
+      return getId(t) !== getTriggerId(event);
+    });
+    
+    $rootScope.docData.events = $rootScope.docData.events.filter(function (e) {
+      return getId(e) !== getId(event);
+    });
+    
+    $rootScope.unselectTagged();
+    $scope.resetTagging();
+  };
+  
   $scope.resolvingDialogue = function() {
     return $scope.dialogueResolutionStep !== "R0";
   };
@@ -124,8 +148,7 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
   };
   
   $scope.selectDS = function() {
-    $scope.ds = $rootScope.selectedTaggedEntities[0].entity;
-    console.log($scope.ds);
+    $scope.ds = $rootScope.selectedTagged[0].entity;
     
     // TODO: Implement function in domain.
     $scope.characterList = $rootScope.collData.entity_types.filter(
@@ -194,21 +217,41 @@ app.controller('interactionTaggingController', function($scope, $rootScope) {
   };
   
   $scope.createDialogueInteraction = function() {
-    var index = $scope.dialogueInteractions.length + 1;
+    if (!$rootScope.docData.dialogues)
+      $rootScope.docData.dialogues = [];
+    
+    var index = $rootScope.docData.dialogues.length + 1;
     
     $rootScope.docData.entities.forEach(function (e) {
       if (getId(e) == getId($scope.ds))
         e[1] = 'DS' + index;
     });
     
-    $scope.dialogueInteractions.push({
+    $rootScope.docData.dialogues.push({
       ds: $scope.ds,
       index: index,
       speakers: $scope.speakers,
       listeners: $scope.listeners
     });
     
+    $scope.dialogues = $rootScope.docData.dialogues.slice();
+    
     $scope.resetResolution();
+  };
+  
+  $scope.deleteDialogue = function(dialogue) {
+    $rootScope.docData.entities.forEach(function (e) {
+      if (getId(e) == getId(dialogue.ds))
+        e[1] = 'DS';
+    });
+    
+    $rootScope.docData.dialogues = $rootScope.docData.dialogues.filter(function (i) {
+      return i.index !== dialogue.index;
+    });
+    
+    $scope.dialogues = $scope.dialogues.filter(function (i) {
+      return i.index !== dialogue.index;
+    });
   };
   
   $scope.resetResolution = function() {
